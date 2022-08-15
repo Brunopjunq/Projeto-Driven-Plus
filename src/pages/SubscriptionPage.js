@@ -1,14 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import LogoWhite from '../assets/LogoWhite.png';
 import UserContext from "../context/UserContext";
 import axios from "axios";
 
 export default function SubscriptionPage() {
     const token = useContext(UserContext);
     const [plans, setPlans] = useState([]);
-    const navigate = useNavigate;
+    const navigate = useNavigate();
 
     useEffect (() => {
         const promise = axios.get('https://mock-api.driven.com.br/api/v4/driven-plus/subscriptions/memberships', token);
@@ -22,10 +21,15 @@ export default function SubscriptionPage() {
     return (
         <Page>
             <Title>Escolha seu Plano</Title>
-            <PlanBox>
-                <img src={LogoWhite} />
-                <p>R$39,90</p>
+            {plans.length !== 0 ? 
+            plans.map((plan, index) =>
+            <PlanBox key={index} onClick={() => ChoosePlan(plan.id)}>
+                <img src={plan.image} />
+                <p>{plan.price}</p>
             </PlanBox>
+            ) : 
+            <p>Carregando...</p>
+            }
         </Page>
     )
 }

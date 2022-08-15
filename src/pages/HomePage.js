@@ -1,18 +1,34 @@
 import styled from "styled-components";
 import UserImg from '../assets/User.png';
 import LogoWhite from '../assets/LogoWhite.png';
+import { useContext } from "react";
+import UserContext from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function HomePage() {
+    const {userData, token} = useContext(UserContext);
+    const navigate = useNavigate();
+
+    function CancelPlan() {
+        const promise = axios.delete('https://mock-api.driven.com.br/api/v4/driven-plus/subscriptions', token);
+        promise.then(res => navigate('/subscriptions'));
+        promise.catch(err => alert('Ocorreu algum erro!Tente Novamente!'))
+    }
+
     return (
         <Page>
-            <PlanLogo src={LogoWhite} />
+            <PlanLogo src={userData.membership.image} />
             <UserLogo src={UserImg} />
-            <Title>Olá, Fulano</Title>
-            <ButtonPink>Solicitar Brindes</ButtonPink>
-            <ButtonPink>Materiais Bônus</ButtonPink>
+            <Title>Olá, {userData.name}</Title>
+            {userData.membership.perks.map((perk, index) =>
+                <ButtonPink key={index}>
+                    <a href={perk.link}>{perk.title}</a>
+                </ButtonPink>
+            )}
             <FooterBox>
-                <button>Mudar Plano</button>
-                <button>Cancelar Plano</button>
+                <button onClick={() => navigate('/subscriptions')}>Mudar Plano</button>
+                <button onClick={CancelPlan}>Cancelar Plano</button>
             </FooterBox>
         </Page>
     )
