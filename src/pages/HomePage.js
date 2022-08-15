@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import UserImg from '../assets/User.png';
-import LogoWhite from '../assets/LogoWhite.png';
 import { useContext } from "react";
 import UserContext from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
