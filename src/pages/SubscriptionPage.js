@@ -5,12 +5,19 @@ import UserContext from "../context/UserContext";
 import axios from "axios";
 
 export default function SubscriptionPage() {
-    const token = useContext(UserContext);
+    const {token} = useContext(UserContext);
     const [plans, setPlans] = useState([]);
     const navigate = useNavigate();
 
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    }
+
     useEffect (() => {
-        const promise = axios.get('https://mock-api.driven.com.br/api/v4/driven-plus/subscriptions/memberships', token);
+        const promise = axios.get('https://mock-api.driven.com.br/api/v4/driven-plus/subscriptions/memberships', config);
         promise.then(res => setPlans(res.data))
     }, []);
 
@@ -25,7 +32,7 @@ export default function SubscriptionPage() {
             plans.map((plan, index) =>
             <PlanBox key={index} onClick={() => ChoosePlan(plan.id)}>
                 <img src={plan.image} />
-                <p>{plan.price}</p>
+                <p>R$ {plan.price}</p>
             </PlanBox>
             ) : 
             <p>Carregando...</p>

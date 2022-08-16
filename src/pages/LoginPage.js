@@ -6,7 +6,7 @@ import UserContext from '../context/UserContext';
 import axios from 'axios';
 
 export default function LoginPage() {
-    const { setData, setToken} = useContext(UserContext);
+    const { setUserData, setToken} = useContext(UserContext);
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -17,10 +17,8 @@ export default function LoginPage() {
             const userlogin = JSON.parse(localStorage.getItem("userdata"));
             const promise = axios.post('https://mock-api.driven.com.br/api/v4/driven-plus/auth/login', userlogin);
             promise.then(res =>{
-                setData(res.data);
-                setToken({headers:{
-                    Authorization: `Bearer ${res.data.token}`
-               }});
+                setUserData(res.data);
+                setToken(res.data.token);
                if (res.data.membership === null) {
                 navigate('/subscriptions');
                }
@@ -42,10 +40,8 @@ export default function LoginPage() {
         const promise = axios.post('https://mock-api.driven.com.br/api/v4/driven-plus/auth/login', body);
 
         promise.then(res => {
-            setData(res.data);
-            setToken({headers:{
-                Authorization: `Bearer ${res.data.token}`
-           }});
+            setUserData(res.data);
+            setToken(res.data.token);
            localStorage.setItem("userdata", JSON.stringify(body));
 
            if (res.data.membership === null) {

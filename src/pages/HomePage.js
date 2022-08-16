@@ -10,7 +10,13 @@ export default function HomePage() {
     const navigate = useNavigate();
 
     function CancelPlan() {
-        const promise = axios.delete('https://mock-api.driven.com.br/api/v4/driven-plus/subscriptions', token);
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+
+        const promise = axios.delete('https://mock-api.driven.com.br/api/v4/driven-plus/subscriptions', config);
         promise.then(res => navigate('/subscriptions'));
         promise.catch(err => alert('Ocorreu algum erro!Tente Novamente!'))
     }
@@ -83,6 +89,16 @@ const ButtonPink = styled.button`
     line-height: 16px;
     color: #FFFFFF;
     margin-bottom: 8px;
+
+    a {
+        font-family: 'Roboto';
+        font-style: normal;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 16px;
+        color: #FFFFFF;
+        text-decoration: none;
+    }
 `
 
 const FooterBox = styled.div`

@@ -1,48 +1,150 @@
 import styled from "styled-components";
 import Back from '../assets/Back.png';
-import LogoWhite from '../assets/LogoWhite.png'
 import Money from '../assets/Money.png';
 import Board from '../assets/Board.png';
 import Close from '../assets/Close.png';
+import { useContext, useEffect, useState } from "react";
+import UserContext from "../context/UserContext";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import LogoWhite from '../assets/LogoWhite.png';
 
 export default function PlanPage() {
-    return (
-        <Page>
-            <BackImg src={Back} />
-            <Logo src={LogoWhite} />
-            <Title>Driven Plus</Title>
-            <Box>
-                <Descrition>
-                    <img src={Board} />
-                    <h1>Benefícios:</h1>
-                </Descrition>
-                <h2>1. Brindes exclusivos</h2>
-                <h2>2. Materiais bônus de web</h2>
-                <Descrition>
-                    <img src={Money} />
-                    <h1>Preços:</h1>
-                </Descrition>
-                <h2>R$ 39,99 cobrados mensalmente</h2>
-            </Box>
-            <form>
-                <Input type='text' placeholder="Nome Impresso no cartão" required/>
-                <Input type='number' placeholder="Dígitos do cartão" required/>
-                <div>
-                    <input type='number' placeholder="Código de Segurança" required/>
-                    <input type='text' placeholder="Validade" required/>
-                </div>
-                <Button type="submit">ASSINAR</Button>
-            </form>
-            <PopUp>
-                <img src={Close} />
-                <PopUpBox>
-                    <p>Tem certeza que deseja assinar o plano Driven Plus R$ 39,99 ?</p>
+    const ID_PLAN = useParams();
+    const {userData, setUserData, token} = useContext(UserContext);
+    const navigate = useNavigate();
+    const [plan,setPlan] = useState(null);
+    const [nameCard, setNameCard] = useState('');
+    const [numbCard, setNumbCard] = useState('');
+    const [cardCVV, setCardCVV] = useState('');
+    const [cardDate, setCardDate] = useState('');
+    const [isPopUpVisible, setIsPopUpVisible] = useState(false);
+
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    }
+
+    useEffect(() => {
+        const promise = axios.get(`https://mock-api.driven.com.br/api/v4/driven-plus/subscriptions/memberships/${ID_PLAN.ID_PLAN}`, config)
+        promise.then(res => setPlan(res.data));
+
+    },[])
+
+    function LoadPlan() {
+        if(plan == null) {
+            return (
+                <h1>Carregando...</h1>
+            )
+        }
+        else {
+            return(
+                <>
+                <BackImg src={Back} onClick={() => navigate('/subscriptions')} />
+                <Logo src={LogoWhite} />
+                <Title>{plan.name}</Title>
+                <Box>
+                    <Descrition>
+                        <img src={Board} />
+                        <h1>Benefícios:</h1>
+                    </Descrition>
+                    {plan.perks.map((plan, index) => 
+                    <h2>{index + 1}. {plan.title}</h2>
+                    )}
+                    <Descrition>
+                        <img src={Money} />
+                        <h1>Preços:</h1>
+                    </Descrition>
+                    <h2>R$ {plan.price} cobrados mensalmente</h2>
+                </Box>
+                <form onSubmit={AssinarPlano}>
+                    <Input type='text' onChange={(e) => setNameCard(e.target.value)} value={nameCard} placeholder="Nome Impresso no cartão" required/>
+                    <Input  onChange={(e)=> setNumbCard(e.target.value
+                        .replace(/\D/g, "")
+                        .replace(/(\d{4})(\d{4})(\d{4})(\d{4})/, "$1 $2 $3 $4")
+                        .substring(0, 19))} 
+                        value={numbCard} placeholder="Dígitos do cartão" required/>
                     <div>
-                        <button>Não</button>
-                        <button>SIM</button>
+                        <input type='text' maxLength='3' minLength='3' onChange={(e) => setCardCVV(e.target.value)} value={cardCVV} placeholder="Código de Segurança" required/>
+                        <input type='text' onChange={(e) => setCardDate(e.target.value)} value={cardDate} placeholder="Validade(DD/MM)" required/>
+                    </div>
+                    <Button type="submit">ASSINAR</Button>
+                </form>
+                </>
+            )
+        }
+
+    }
+
+    function LoadConfirmation() {
+        if(isPopUpVisible === true) {
+            return(
+                <PopUp>
+                <img src={Close} onClick={() => setIsPopUpVisible(false)}/>
+                <PopUpBox>
+                    <p>Tem certeza que deseja assinar o plano Driven Plus R$ {plan.price} ?</p>
+                    <div>
+                        <button onClick={() => setIsPopUpVisible(false)}>Não</button>
+                        <button onClick={ConfirmarAssinatura}>SIM</button>
                     </div>
                 </PopUpBox>
             </PopUp>
+            )
+        }
+        else {
+            return(
+                <></>
+            )
+        }
+    }
+
+    function AssinarPlano(e) {
+        e.preventDefault();
+        setIsPopUpVisible(true);
+    }
+
+    function ConfirmarAssinatura() {
+        const body = {
+            membershipId: plan.id,
+            cardName: nameCard,
+            cardNumber: numbCard,
+            securityNumber: cardCVV,
+            expirationDate: cardDate
+        }
+
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+
+        const promise = axios.post('https://mock-api.driven.com.br/api/v4/driven-plus/subscriptions', body, config)
+        promise.then(res =>{
+            const newUserData = {...userData, membership: plan}
+            setUserData(newUserData);
+            navigate('/home');
+        })
+        promise.catch(err => {
+            setNameCard('');
+            setNumbCard('');
+            setCardCVV('');
+            setCardDate('');
+            setIsPopUpVisible(false);
+            alert('Confira se os dados do cartão estão corretos e tente novamente!')
+        })
+
+        console.log(body);
+
+    }
+
+    const PageInfo = LoadPlan();
+    const PopUpInfo = LoadConfirmation();
+
+    return (
+        <Page>
+            {PageInfo}
+            {PopUpInfo}
         </Page>
     )
 }
@@ -186,7 +288,7 @@ const PopUp = styled.div`
     position: absolute;
     top: 0px;
     left: 0px;
-    visibility: inherit;
+    /* visibility: ${props => props.isPopUpVisible}; */
 
     img {
         position: absolute;

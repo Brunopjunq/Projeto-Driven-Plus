@@ -43,7 +43,7 @@ export default function SignUpPage () {
         <Page>
             <form onSubmit={FazerCadastro}>
                 <Input type='text' value={name} placeholder="Nome" onChange={e => setName(e.target.value)} required/>
-                <Input type='number' value={cpf} placeholder="CPF" onChange={(e)=> setCpf(e.target.value
+                <Input  value={cpf} placeholder="CPF" onChange={(e)=> setCpf(e.target.value
             .replace(/\D/g, "")
             .replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")
             .substring(0, 14))}  required/>
