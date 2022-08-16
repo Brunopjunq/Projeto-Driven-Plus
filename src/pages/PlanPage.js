@@ -42,7 +42,7 @@ export default function PlanPage() {
             return(
                 <>
                 <BackImg src={Back} onClick={() => navigate('/subscriptions')} />
-                <Logo src={LogoWhite} />
+                <Logo src={plan.image} />
                 <Title>{plan.name}</Title>
                 <Box>
                     <Descrition>
